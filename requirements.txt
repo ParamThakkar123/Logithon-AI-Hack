@@ -1,6 +1,7 @@
 langchain
 transformers
-pytorch
 langchain-community
 uuid
 PyPDF2
+streamlit
+streamlit-chat
