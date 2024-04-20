@@ -5,3 +5,4 @@ uuid
 PyPDF2
 streamlit
 streamlit-chat
+python-dotenv
