@@ -3,3 +3,5 @@ langchain
 transformers
 pytorch
 langchain-community
+uuid
+PyPDF2
