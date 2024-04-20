@@ -18,22 +18,22 @@ This project tackles PDF data extraction using a Large Language Model for layout
 ##  About the project 
 This project makes a smart system for getting answers to text questions. People type their questions and the system uses the LLAMA-13B  model to give good answers.
 ## Tech Stack
-WEB Technologies
+#### WEB Technologies
     Next.js
     Typescript
     FastAPI
 
-Machine Learning Technologies
+#### Machine Learning Technologies
     Python
     Huggingface LLMs
     Pytorch
     Reinforcement Learning
 
-Data Analysis: 
+#### Data Analysis: 
     Numpy
     Pandas
     Matplotlib
 
-Databases:
+#### Databases:
     ChromaDB (Vector database)
     Firebase
