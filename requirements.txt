@@ -7,5 +7,5 @@ streamlit
 streamlit-chat
 python-dotenv
 langchain-chroma
-sqlite3
 chromadb
+pysqlite
