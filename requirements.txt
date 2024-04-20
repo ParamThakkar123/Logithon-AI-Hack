@@ -8,4 +8,3 @@ streamlit-chat
 python-dotenv
 langchain-chroma
 chromadb
-sqlite3
