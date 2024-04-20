@@ -7,5 +7,5 @@ streamlit
 streamlit-chat
 python-dotenv
 langchain-chroma
-chromadb
-sqlite3==3.35.0
+chromadb==0.3.29
+sqlite3
