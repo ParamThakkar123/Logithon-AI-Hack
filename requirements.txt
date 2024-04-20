@@ -1,0 +1,5 @@
+dotenv
+langchain
+transformers
+pytorch
+langchain-community
