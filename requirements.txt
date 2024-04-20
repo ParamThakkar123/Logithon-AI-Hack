@@ -1,4 +1,3 @@
-dotenv
 langchain
 transformers
 pytorch
