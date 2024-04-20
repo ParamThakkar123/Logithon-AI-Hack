@@ -1,35 +1,43 @@
 import os
-import textwrap
 import time
 import uuid
+from dotenv import load_dotenv
 from pathlib import Path
 from langchain_core.prompts import PromptTemplate
-
-import langchain
 from langchain.chains import RetrievalQA
 from langchain.chat_models import ChatOllama
 from langchain.document_loaders import PyPDFLoader
+from langchain_community.document_loaders.llmsherpa import LLMSherpaFileLoader
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_chroma import Chroma
+from langchain_groq import ChatGroq
+from config import Config
 from langchain.vectorstores import FAISS
 
-from config import Config
-
+load_dotenv()
+groq_api_key = os.environ['GROQ_API_KEY']
 
 # This loads the PDF file
 def load_pdf_data(file_path):
-    # Create a PyMuPDFLoader object with file_path
+    #Create a PyMuPDFLoader object with file_path
     loader = PyPDFLoader(file_path=file_path)
-
-    # load the PDF file
     docs = loader.load()
-
-    # return the loaded document
+    #return the loaded document
     return docs
+    # loader = LLMSherpaFileLoader(
+    #     file_path=file_path,
+    #     new_indent_parser=True,
+    #     apply_ocr=True,
+    #     strategy="sections",
+    #     llmsherpa_api_url="https://readers.llmsherpa.com/api/document/developer/parseDocument?renderFormat=all",
+    # )
+    # docs = loader.load()
+    # return docs
 
 
 # Responsible for splitting the documents into several chunks
-def split_docs(documents, chunk_size=1000, chunk_overlap=20):
+def split_docs(documents, chunk_size=1024, chunk_overlap=40):
     # Initialize the RecursiveCharacterTextSplitter with
     # chunk_size and chunk_overlap
     text_splitter = RecursiveCharacterTextSplitter(
@@ -75,8 +83,7 @@ def create_embeddings(chunks, embedding_model, storing_path="vectorstore"):
 
     print("Writing vectorstore..")
     v_start_time = time.time()
-
-    # Save the model in a directory
+    
     vectorstore.save_local(storing_path)
 
     v_end_time = time.time()
@@ -105,11 +112,8 @@ def load_qa_chain(retriever, llm, prompt):
 
 
 def get_response(query, chain) -> str:
-    # Get response from chain
     response = chain({'query': query})
     res = response['result']
-    # Wrap the text for better output in Jupyter Notebook
-    # wrapped_text = textwrap.fill(res, width=100)
     return res
 
 
@@ -127,20 +131,19 @@ class PDFHelper:
         os.makedirs(vector_store_directory, exist_ok=True)
         print(f"Using vector store: {vector_store_directory}")
 
-        llm = ChatOllama(
-            temperature=0,
-            base_url=self._ollama_api_base_url,
-            model=self._model_name,
-            streaming=True,
-            # seed=2,
-            top_k=10,
-            # A higher value (100) will give more diverse answers, while a lower value (10) will be more conservative.
-            top_p=0.3,
-            # Higher value (0.95) will lead to more diverse text, while a lower value (0.5) will generate more
-            # focused text.
-            num_ctx=3072,  # Sets the size of the context window used to generate the next token.
-            verbose=False
-        )
+        llm = ChatGroq(groq_api_key=groq_api_key, model="llama2-70b-4096")
+            # temperature=0,
+            # base_url=self._ollama_api_base_url,
+            # model=self._model_name,
+            # streaming=True,
+            # # seed=2,
+            # top_k=5,
+            # # A higher value (100) will give more diverse answers, while a lower value (10) will be more conservative.
+            # top_p=0.3,
+            # # Higher value (0.95) will lead to more diverse text, while a lower value (0.5) will generate more
+            # # focused text.
+            # num_ctx=3072,  # Sets the size of the context window used to generate the next token.
+            # verbose=False
 
         # Load the Embedding Model
         embed = load_embedding_model(model_name=self._embedding_model_name)
@@ -158,7 +161,8 @@ class PDFHelper:
         template = """
         ### System:
         You are an honest assistant.
-        You will accept PDF files and you will answer the question asked by the user appropriately.
+        You will accept PDF files and you will answer the question asked by the user accurately.
+        Don't infer anything by yourself. Just analyze the data.
         If you don't know the answer, just say you don't know. Don't try to make up an answer.
     
         ### Context:
@@ -184,5 +188,7 @@ class PDFHelper:
         time_taken = round(end_time - start_time, 2)
 
         print(f"Response time: {time_taken} seconds.\n")
-
+        with open("output.txt", "w") as f:
+            f.write(response.strip())
+        
         return response.strip()

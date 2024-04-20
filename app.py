@@ -1,9 +1,9 @@
 import os
 from pathlib import Path
 from typing import Optional
-
+from io import BytesIO
 import streamlit as st
-
+import json  # Import JSON module
 from config import Config
 from pdf_helper import PDFHelper, load_embedding_model
 
@@ -23,6 +23,26 @@ print(f"Using PDFs upload directory: {pdfs_directory}")
 
 st.set_page_config(page_title=title)
 
+json_mode = st.sidebar.checkbox("JSON Mode", False)
+
+def messages_to_json(messages):
+    json_data = []
+    for message in messages:
+        if message["role"] == "assistant":
+            json_data.append({"role": message["role"], "content": message["content"]})
+    return json_data
+
+def download_json(data, filename="data.json"):
+    bytes_data = json.dumps(data, indent=4).encode("utf-8")
+    buffer = BytesIO()
+    buffer.write(bytes_data)
+    buffer.seek(0)
+    st.download_button(label="Download JSON", data=buffer, file_name=filename, mime="application/json")
+    
+if st.sidebar.button("Download JSON"):
+    messages = st.session_state.messages
+    json_data = messages_to_json(messages)
+    download_json(json_data)
 
 def on_upload_change():
     # clear_chat_history()
@@ -30,17 +50,13 @@ def on_upload_change():
 
     st.session_state.messages = [{"role": "assistant", "content": init_msg}]
 
-
-
 def set_uploaded_file(_uploaded_file: str):
     st.session_state['uploaded_file'] = _uploaded_file
-
 
 def get_uploaded_file() -> Optional[str]:
     if 'uploaded_file' in st.session_state:
         return st.session_state['uploaded_file']
     return None
-
 
 with st.sidebar:
     st.title(title)
@@ -79,14 +95,15 @@ if "messages" not in st.session_state.keys():
 # Display or clear chat messages
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
-        st.write(message["content"])
-
+        if json_mode and message["role"] == "assistant":  # Check if JSON mode is enabled and message is from assistant
+            st.write(json.dumps(message))  # Display messages from assistant in JSON format
+        else:
+            st.write(message["content"])  # Display all other messages in regular chat format
 
 def clear_chat_history():
     from streamlit_js_eval import streamlit_js_eval
     streamlit_js_eval(js_expressions="parent.window.location.reload()")
     st.session_state.messages = [{"role": "assistant", "content": init_msg}]
-
 
 st.sidebar.button('Reset', on_click=clear_chat_history)
 
