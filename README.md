@@ -18,7 +18,7 @@ This project tackles PDF data extraction using a Large Language Model for layout
 
 7.Acknowledgements and Resource
 ##  About the project 
-This project makes a smart system for getting answers to text questions. People type their questions and the system uses the LLAMA-13B  model to give good answers.
+This project makes a smart system for getting answers to text questions. People type their questions and the system uses the LLAMA-13B  model to give answers.
 ## Tech Stack
 #### WEB Technologies
     Next.js
