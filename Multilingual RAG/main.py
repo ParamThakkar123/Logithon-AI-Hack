@@ -9,11 +9,11 @@ import torch
 from langchain.llms import huggingface_pipeline
 import requests
 from bs4 import BeautifulSoup
-from sentence_transformers import SentenceTransformer
 import bs4
 import re
 import tabulate
 from github import Github
+from load_models import load_embedding_model
 
 if "messages" not in st.session_state:
     st.session_state["messages"] = []
